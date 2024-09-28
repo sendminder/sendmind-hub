@@ -27,11 +27,8 @@ func initConfig() {
 
 // 데이터베이스 초기화
 func initDB() {
-	println("user:" + viper.GetString("SENDMIND_POSTGRES_USER"))
-	println("db:" + viper.GetString("SENDMIND_POSTGRES_DB"))
-
 	db = pg.Connect(&pg.Options{
-		Addr:     "127.0.0.1:5432",
+		Addr:     "postgresql:5432",
 		User:     viper.GetString("SENDMIND_POSTGRES_USER"),
 		Password: viper.GetString("SENDMIND_POSTGRES_PASSWORD"),
 		Database: viper.GetString("SENDMIND_POSTGRES_DB"),
