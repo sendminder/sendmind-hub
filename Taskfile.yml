@@ -1,0 +1,24 @@
+version: "3"
+
+tasks:
+  lint:
+    desc: "Run golangci-lint to check for linting issues"
+    cmds:
+      - golangci-lint run ./...
+    silent: true
+
+  fix:
+    desc: "Run golangci-lint to fix linting issues"
+    cmds:
+      - golangci-lint run --fix ./...
+    silent: true
+
+  build:
+    desc: "Build the project"
+    cmds:
+      - go build ./...
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - go test ./...
