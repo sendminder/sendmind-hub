@@ -15,7 +15,7 @@ type DB struct {
 
 func NewDB(cfg *config.Config) *DB {
 	db := pg.Connect(&pg.Options{
-		Addr:     "postgresql:5432",
+		Addr:     cfg.PostGresAddr,
 		User:     cfg.PostGresUser,
 		Password: cfg.PostGresPassword,
 		Database: cfg.PostGresDB,

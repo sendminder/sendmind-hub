@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct {
+	PostGresAddr     string
 	PostGresUser     string
 	PostGresPassword string
 	PostGresDB       string
@@ -13,6 +14,7 @@ type Config struct {
 func NewConfig() *Config {
 	viper.AutomaticEnv()
 	return &Config{
+		PostGresAddr:     viper.GetString("SENDMIND_POSTGRES_ADDR"),
 		PostGresUser:     viper.GetString("SENDMIND_POSTGRES_USER"),
 		PostGresPassword: viper.GetString("SENDMIND_POSTGRES_PASSWORD"),
 		PostGresDB:       viper.GetString("SENDMIND_POSTGRES_DB"),
