@@ -36,6 +36,7 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		log.Error().Msgf("CreateUser Error: %v", err)
 	}
+	log.Info().Msgf("[sendmind-hub][POST][User] r:%v user:%v", r, user)
 }
 
 func (h *UserHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,4 +52,5 @@ func (h *UserHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error().Msgf("GetUsers Error: %v", err)
 	}
+	log.Info().Msgf("[sendmind-hub][GET][Users] r:%v users:%v", r, users)
 }

@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 
 # 애플리케이션 빌드
-RUN go build -o /app/sendmind-hub
+RUN go build -o /app/sendmind-hub ./cmd/server
 
 # 런타임 스테이지
 FROM alpine:latest
