@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"sendmind-hub/internal/users"
 	"sendmind-hub/pkg/config"
@@ -22,6 +21,9 @@ func main() {
 	r.HandleFunc("/users", userHandler.CreateUserHandler).Methods("POST")
 	r.HandleFunc("/users", userHandler.GetUsersHandler).Methods("GET")
 
-	fmt.Println("Server running on port 8080")
-	log.Info().Msg(http.ListenAndServe(":8080", r))
+	log.Info().Msg("Server running on port 8080")
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		log.Error().Msgf("Server Run Failed err: %v", err)
+	}
 }
