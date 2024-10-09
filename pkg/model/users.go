@@ -2,13 +2,13 @@ package model
 
 type User struct {
 	ID              int64  `json:"id"`
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	ProfileImageURL string `json:"profile_image_url"`
 	AuthToken       string `json:"auth_token"`
 	AuthProvider    string `json:"auth_provider"`
-	CreateTime      string `json:"create_time"`
-	UpdateTime      string `json:"update_time"`
-	LastLoginTime   string `json:"last_login_time"`
-	IsActive        bool   `json:"is_active"`
+	Name            string `json:"name,omitempty"`
+	Email           string `json:"email,omitempty"`
+	ProfileImageURL string `json:"profile_image_url,omitempty"`
+	CreateTime      string `json:"create_time,omitempty"`
+	UpdateTime      string `json:"update_time,omitempty"`
+	LastLoginTime   string `json:"last_login_time,omitempty"`
+	IsActive        bool   `json:"is_active,omitempty"`
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-pg/pg"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type LoginHandler struct {
@@ -29,10 +30,12 @@ func (h *LoginHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. check duplicated in user db
-	// auth_token 같으면서 auth_provider가 같은 유저가 있는지 확인
+	// auth_token 같으면서 auth_provider가 같은 유저 또는 email이 같은 유저가 있는지 확인
 	var alreadySignUpUser model.User
-	err = h.DB.Model(&alreadySignUpUser).Where("auth_token = ?", req.AuthToken).Where("auth_provider = ?", req.AuthProvider).Select()
-	if err != nil {
+	err = h.DB.Model(&alreadySignUpUser).
+		WhereOr("auth_token = ? AND auth_provider = ?", req.AuthToken, req.AuthProvider).
+		WhereOr("email = ?", req.Email).Select()
+	if err != nil && err != gorm.ErrRecordNotFound {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Error().Msgf("HandleSignUp Error: %v", err)
 		return
