@@ -31,7 +31,7 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. Firebase ID 토큰 검증
-	token, err := h.firebaseAuth.VerifyIDToken(context.Background(), req.AuthToken)
+	token, err := h.firebaseAuth.VerifyIDToken(context.Background(), req.IDToken)
 	if err != nil {
 		http.Error(w, "Invalid ID token", http.StatusUnauthorized)
 		log.Error().Msgf("Failed to verify ID token: %v", err)
