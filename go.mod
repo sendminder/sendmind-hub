@@ -4,6 +4,7 @@ go 1.23.0
 
 require (
 	github.com/go-pg/pg v8.0.7+incompatible
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/mux v1.8.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/viper v1.19.0

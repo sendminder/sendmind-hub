@@ -8,7 +8,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// verifyRequest 함수
 func (h *LoginHandler) verifyRequest(r *http.Request) error {
 	// 1. 요청에서 signature와 timestamp 가져오기
 	receivedSignature := r.Header.Get("X-Signature")
