@@ -9,6 +9,7 @@ type Config struct {
 	PostGresUser     string
 	PostGresPassword string
 	PostGresDB       string
+	SecretKey        string
 }
 
 func NewConfig() *Config {
@@ -18,5 +19,6 @@ func NewConfig() *Config {
 		PostGresUser:     viper.GetString("SENDMIND_POSTGRES_USER"),
 		PostGresPassword: viper.GetString("SENDMIND_POSTGRES_PASSWORD"),
 		PostGresDB:       viper.GetString("SENDMIND_POSTGRES_DB"),
+		SecretKey:        viper.GetString("SENDMIND_SECRET_KEY"),
 	}
 }

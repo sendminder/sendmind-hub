@@ -5,23 +5,36 @@ import (
 	"net/http"
 	"sendmind-hub/pkg/model"
 	"sendmind-hub/pkg/model/request"
+	"sendmind-hub/pkg/security"
 
 	"github.com/go-pg/pg"
 	"github.com/rs/zerolog/log"
 )
 
 type LoginHandler struct {
-	DB *pg.DB
+	db   *pg.DB
+	hmac *security.SecurityHMAC
 }
 
-func NewLoginHandler(db *pg.DB) *LoginHandler {
-	return &LoginHandler{DB: db}
+func NewLoginHandler(db *pg.DB, hmac *security.SecurityHMAC) *LoginHandler {
+	return &LoginHandler{
+		db:   db,
+		hmac: hmac,
+	}
 }
 
 func (h *LoginHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
+	// 0. verify request
+	err := h.verifyRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Error().Msgf("HandleSignUp Error: %v", err)
+		return
+	}
+
 	// 1. decode request
 	var req request.RequestSignUp
-	err := json.NewDecoder(r.Body).Decode(&req)
+	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		log.Error().Msgf("HandleSignUp Error: %v", err)
@@ -31,7 +44,7 @@ func (h *LoginHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 	// 2. check duplicated in user db
 	// auth_token 같으면서 auth_provider가 같은 유저 또는 email이 같은 유저가 있는지 확인
 	var alreadySignUpUser model.User
-	err = h.DB.Model(&alreadySignUpUser).
+	err = h.db.Model(&alreadySignUpUser).
 		WhereOr("auth_token = ? AND auth_provider = ?", req.AuthToken, req.AuthProvider).
 		WhereOr("email = ?", req.Email).Select()
 	if err != nil && err != pg.ErrNoRows {
@@ -56,7 +69,7 @@ func (h *LoginHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 	newUser.Name = req.Name
 	newUser.Email = req.Email
 
-	_, err = h.DB.Model(&newUser).Insert()
+	_, err = h.db.Model(&newUser).Insert()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Error().Msgf("CreateLogin Error: %v", err)

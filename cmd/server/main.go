@@ -6,6 +6,7 @@ import (
 	"sendmind-hub/internal/users"
 	"sendmind-hub/pkg/config"
 	"sendmind-hub/pkg/database"
+	"sendmind-hub/pkg/security"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
@@ -15,8 +16,9 @@ func main() {
 	cfg := config.NewConfig()
 	db := database.NewDB(cfg)
 
-	userHandler := users.NewUserHandler(db.Conn)
-	loginHandler := login.NewLoginHandler(db.Conn)
+	securityHMAC := security.NewHMAC(cfg.SecretKey)
+	userHandler := users.NewUserHandler(db.Conn, securityHMAC)
+	loginHandler := login.NewLoginHandler(db.Conn, securityHMAC)
 
 	r := mux.NewRouter()
 

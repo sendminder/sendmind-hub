@@ -4,17 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 	"sendmind-hub/pkg/model"
+	"sendmind-hub/pkg/security"
 
 	"github.com/go-pg/pg"
 	"github.com/rs/zerolog/log"
 )
 
 type UserHandler struct {
-	DB *pg.DB
+	db   *pg.DB
+	hmac *security.SecurityHMAC
 }
 
-func NewUserHandler(db *pg.DB) *UserHandler {
-	return &UserHandler{DB: db}
+func NewUserHandler(db *pg.DB, hmac *security.SecurityHMAC) *UserHandler {
+	return &UserHandler{
+		db:   db,
+		hmac: hmac,
+	}
 }
 
 func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +30,7 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	_, err := h.DB.Model(&user).Insert()
+	_, err := h.db.Model(&user).Insert()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Error().Msgf("CreateUser Error: %v", err)
@@ -41,7 +46,7 @@ func (h *UserHandler) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 
 func (h *UserHandler) GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 	var users []model.User
-	err := h.DB.Model(&users).Select()
+	err := h.db.Model(&users).Select()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Error().Msgf("GetUsers Error: %v", err)
