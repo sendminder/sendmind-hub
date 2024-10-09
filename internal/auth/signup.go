@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"sendmind-hub/pkg/api/request"
@@ -29,11 +30,22 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. check duplicated in user db
+	// 2. Firebase ID 토큰 검증
+	token, err := h.firebaseAuth.VerifyIDToken(context.Background(), req.AuthToken)
+	if err != nil {
+		http.Error(w, "Invalid ID token", http.StatusUnauthorized)
+		log.Error().Msgf("Failed to verify ID token: %v", err)
+		return
+	}
+
+	// 3. 유저 정보 가져오기
+	uid := token.UID
+
+	// 4. check duplicated in user db
 	// auth_token 같으면서 auth_provider가 같은 유저 또는 email이 같은 유저가 있는지 확인
 	var alreadySignUpUser model.User
 	err = h.db.Model(&alreadySignUpUser).
-		WhereOr("auth_token = ? AND auth_provider = ?", req.AuthToken, req.AuthProvider).
+		WhereOr("firebase_uid = ? AND auth_provider = ?", uid, req.AuthProvider).
 		WhereOr("email = ?", req.Email).Select()
 	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -50,10 +62,10 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. 이미 가입한 유저가 없으면 새로 유저 테이블 추가
+	// 5. 이미 가입한 유저가 없으면 새로 유저 테이블 추가
 	newUser := model.User{
 		AuthProvider: req.AuthProvider,
-		AuthToken:    req.AuthToken,
+		FirebaseUID:  uid,
 		Name:         req.Name,
 		Email:        req.Email,
 	}
@@ -64,7 +76,7 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 4. Access Token과 Refresh Token 생성
+	// 6. Access Token과 Refresh Token 생성
 	accessToken, err := h.tokenManager.GenerateAccessToken(newUser.ID)
 	if err != nil {
 		http.Error(w, "Failed to generate access token", http.StatusInternalServerError)
@@ -79,21 +91,21 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 5. 응답 데이터 생성
+	// 7. 응답 데이터 생성
 	signUpResponse := response.SignUpResponse{
 		User:         newUser,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
 
-	// 6. RestResponse로 응답 작성
+	// 8. RestResponse로 응답 작성
 	restResponse := response.RestResponse{
 		Status:   "success",
 		Message:  "User signed up successfully",
 		Response: signUpResponse,
 	}
 
-	// 7. 응답 보내기
+	// 9. 응답 보내기
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(restResponse)

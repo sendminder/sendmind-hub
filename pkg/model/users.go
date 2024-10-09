@@ -2,7 +2,7 @@ package model
 
 type User struct {
 	ID              int64  `json:"id"`
-	AuthToken       string `json:"auth_token"`
+	FirebaseUID     string `json:"firebase_uid"`
 	AuthProvider    string `json:"auth_provider"`
 	Name            string `json:"name,omitempty"`
 	Email           string `json:"email,omitempty"`

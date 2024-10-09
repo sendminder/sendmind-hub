@@ -17,8 +17,8 @@ func main() {
 	db := database.NewDB(cfg)
 
 	securityHMAC := security.NewHMAC(cfg.SecretKey)
-	TokenManager := security.NewTokenManager(cfg.SecretKey)
-	authHandler := auth.NewAuthHandler(db.Conn, securityHMAC, TokenManager)
+	tokenManager := security.NewTokenManager(cfg.SecretKey)
+	authHandler := auth.NewAuthHandler(db.Conn, securityHMAC, tokenManager, cfg.GoogleKeyPath)
 	userHandler := users.NewUserHandler(db.Conn, securityHMAC)
 
 	r := mux.NewRouter()
