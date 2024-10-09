@@ -6,3 +6,8 @@ type RequestSignUp struct {
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 }
+
+type RequestLogin struct {
+	AuthProvider string `json:"auth_provider"`
+	IDToken      string `json:"id_token"`
+}

@@ -13,7 +13,6 @@ import (
 )
 
 func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("[sendmind-hub][POST][User] r:%v", r)
 	// 0. verify request
 	err := h.verifyRequest(r)
 	if err != nil {
@@ -22,7 +21,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 1")
 	// 1. decode request
 	var req request.RequestSignUp
 	err = json.NewDecoder(r.Body).Decode(&req)
@@ -32,7 +30,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 2")
 	// 2. Firebase ID 토큰 검증
 	token, err := h.firebaseAuth.VerifyIDToken(context.Background(), req.IDToken)
 	if err != nil {
@@ -41,11 +38,9 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 3")
 	// 3. 유저 정보 가져오기
 	uid := token.UID
 
-	log.Info().Msgf("HandleSignUp 4")
 	// 4. check duplicated in user db
 	// auth_token 같으면서 auth_provider가 같은 유저 또는 email이 같은 유저가 있는지 확인
 	var alreadySignUpUser model.User
@@ -57,14 +52,12 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		log.Error().Msgf("HandleSignUp Error: %v", err)
 		return
 	}
-	log.Info().Msgf("HandleSignUp 5")
 	// 이미 가입한 유저가 있으면 유저 반환하고 종료
 	if alreadySignUpUser.ID != 0 {
 		signUpResponse := response.SignUpResponse{
 			User: alreadySignUpUser,
 		}
 
-		log.Info().Msgf("HandleSignUp 10")
 		// 10. RestResponse로 응답 작성
 		restResponse := response.RestResponse{
 			Status:   "success",
@@ -79,7 +72,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 6")
 	// 6. 이미 가입한 유저가 없으면 새로 유저 테이블 추가
 	newUser := model.User{
 		AuthProvider: req.AuthProvider,
@@ -94,7 +86,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 7")
 	// 7. Access Token과 Refresh Token 생성
 	accessToken, err := h.tokenManager.GenerateAccessToken(newUser.ID)
 	if err != nil {
@@ -103,7 +94,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 8")
 	refreshToken, err := h.tokenManager.GenerateRefreshToken(newUser.ID)
 	if err != nil {
 		http.Error(w, "Failed to generate refresh token", http.StatusInternalServerError)
@@ -111,7 +101,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info().Msgf("HandleSignUp 8")
 	// 9. 응답 데이터 생성
 	signUpResponse := response.SignUpResponse{
 		User:         newUser,
@@ -119,7 +108,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: refreshToken,
 	}
 
-	log.Info().Msgf("HandleSignUp 10")
 	// 10. RestResponse로 응답 작성
 	restResponse := response.RestResponse{
 		Status:   "success",
@@ -127,7 +115,6 @@ func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 		Response: signUpResponse,
 	}
 
-	log.Info().Msgf("HandleSignUp 11")
 	// 11. 응답 보내기
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
