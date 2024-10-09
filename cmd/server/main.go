@@ -2,7 +2,7 @@ package main
 
 import (
 	"net/http"
-	"sendmind-hub/internal/login"
+	"sendmind-hub/internal/auth"
 	"sendmind-hub/internal/users"
 	"sendmind-hub/pkg/config"
 	"sendmind-hub/pkg/database"
@@ -18,14 +18,15 @@ func main() {
 
 	securityHMAC := security.NewHMAC(cfg.SecretKey)
 	TokenManager := security.NewTokenManager(cfg.SecretKey)
-	loginHandler := login.NewLoginHandler(db.Conn, securityHMAC, TokenManager)
+	authHandler := auth.NewAuthHandler(db.Conn, securityHMAC, TokenManager)
 	userHandler := users.NewUserHandler(db.Conn, securityHMAC)
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/users", userHandler.CreateUserHandler).Methods("POST")
 	r.HandleFunc("/users", userHandler.GetUsersHandler).Methods("GET")
-	r.HandleFunc("/signup", loginHandler.HandleSignUp).Methods("POST")
+	r.HandleFunc("/signup", authHandler.HandleSignUp).Methods("POST")
+	r.HandleFunc("/login", authHandler.HandleLogin).Methods("POST")
 
 	log.Info().Msg("Server running on port 8080")
 	err := http.ListenAndServe(":8080", r)

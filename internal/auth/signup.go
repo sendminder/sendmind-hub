@@ -1,4 +1,4 @@
-package login
+package auth
 
 import (
 	"encoding/json"
@@ -6,27 +6,12 @@ import (
 	"sendmind-hub/pkg/api/request"
 	"sendmind-hub/pkg/api/response"
 	"sendmind-hub/pkg/model"
-	"sendmind-hub/pkg/security"
 
 	"github.com/go-pg/pg"
 	"github.com/rs/zerolog/log"
 )
 
-type LoginHandler struct {
-	db           *pg.DB
-	hmac         *security.SecurityHMAC
-	tokenManager *security.TokenManager
-}
-
-func NewLoginHandler(db *pg.DB, hmac *security.SecurityHMAC, tokenManager *security.TokenManager) *LoginHandler {
-	return &LoginHandler{
-		db:           db,
-		hmac:         hmac,
-		tokenManager: tokenManager,
-	}
-}
-
-func (h *LoginHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 	// 0. verify request
 	err := h.verifyRequest(r)
 	if err != nil {
