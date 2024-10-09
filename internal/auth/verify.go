@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"net/http"
 	"time"
 
@@ -41,15 +43,15 @@ func (h *AuthHandler) verifyRequest(r *http.Request) error {
 	return nil
 }
 
-// getRequestBody 함수
 func getRequestBody(r *http.Request) (string, error) {
-	body := r.Body
-	defer body.Close()
-
-	buf := make([]byte, r.ContentLength)
-	_, err := body.Read(buf)
+	// 요청 본문 전체 읽기
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		return "", err
 	}
-	return string(buf), nil
+
+	// 요청 본문을 다시 읽을 수 있도록 복구
+	r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	return string(bodyBytes), nil
 }
