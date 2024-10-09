@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-pg/pg"
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
 )
 
 type LoginHandler struct {
@@ -35,7 +34,7 @@ func (h *LoginHandler) HandleSignUp(w http.ResponseWriter, r *http.Request) {
 	err = h.DB.Model(&alreadySignUpUser).
 		WhereOr("auth_token = ? AND auth_provider = ?", req.AuthToken, req.AuthProvider).
 		WhereOr("email = ?", req.Email).Select()
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil && err != pg.ErrNoRows {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Error().Msgf("HandleSignUp Error: %v", err)
 		return
